@@ -1,18 +1,22 @@
-import React, { Component } from 'react';
+import React, { forwardRef } from 'react';
+import PropTypes from 'prop-types';
 
-class CustomDateInput extends Component {
-  render() {
-    const { value, onClick } = this.props;
-    return (
-      <button
-        onClick={onClick}
-        className="button is-primary is-outlined"
-        type="button"
-      >
-        {value}
-      </button>
-    );
-  }
-}
+/* eslint-disable no-unused-vars */
+const CustomDateInput = ({ value, onClick }, ref) => {
+  return (
+    <button
+      onClick={onClick}
+      className="button is-primary is-outlined"
+      type="button"
+    >
+      {value}
+    </button>
+  );
+};
 
-export default CustomDateInput;
+export default forwardRef(CustomDateInput);
+
+CustomDateInput.propTypes = {
+  value: PropTypes.string.isRequired,
+  onClick: PropTypes.func.isRequired,
+};

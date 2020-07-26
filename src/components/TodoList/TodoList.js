@@ -1,119 +1,125 @@
-import React, { Component } from 'react';
+import React, { useState } from 'react';
+import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
+import updateTasks from '../../redux/actions';
 import Heading from '../Heading/Heading';
-import tasksMock from '../../assets/mock/todos';
 import TodoListItem from '../TodoListItem/TodoListItem';
 import TodoEditItem from '../TodoEditItem/TodoEditItem';
 
-class TodoList extends Component{
-  constructor(props) {
-    super(props);
-    this.state = {
-      tasks: [],
-      activeTask: undefined,
-      isOpenModal: false
-    };
-  }
+const FILTER_OPTIONS = ['All', 'Done', 'Active'];
 
-  componentDidMount () {
-    const store = localStorage.getItem('tasks');
-    const storedTasks = JSON.parse(store);
-    this.setState({ tasks: storedTasks && storedTasks.length ? storedTasks : tasksMock })
-  }
+const TodoList = ({ onUpdateTasks, tasks }) => {
+  const [activeTask, setActiveTask] = useState(undefined);
+  const [isOpenModal, setIsOpenModal] = useState(false);
+  const [filter, setFilter] = useState('All');
 
-  componentDidUpdate (prevProps, prevState) {
-    const { tasks } = this.state;
-    if (prevState.tasks !== tasks) {
-      localStorage.setItem('tasks', JSON.stringify(tasks));
-    }
-  };
-
-  addTask = () => {
-    const { tasks } = this.state;
-    const task = {
-      id: this.getNewTaskId(),
+  const addTask = () => {
+    const timeStamp = Date.now();
+    const newTask = {
+      id: timeStamp,
       title: 'New task, press to edit...',
-      date: Date.now(),
+      date: timeStamp,
       done: false
     };
-    this.setState({
-      tasks: [...tasks, task]
-    })
+    onUpdateTasks([...tasks, newTask]);
   };
 
-  getNewTaskId = () => {
-    const { tasks } = this.state;
-    let id = 1;
-    if (tasks.length) {
-      tasks.sort((a, b) => a.id - b.id);
-      const lastTask =  tasks.slice(-1).pop();
-      id = lastTask.id + 1;
+  const toggleModal = () => setIsOpenModal((prevIsOpenModal) => !prevIsOpenModal);
+
+  const deleteTask = (id) => {
+    onUpdateTasks(tasks.filter((task) => task.id !== id));
+    toggleModal();
+  };
+
+  const handleItemClick = (id) => {
+    setActiveTask(tasks.find(
+      (task) => task.id === id
+    ));
+    toggleModal();
+  };
+
+  const saveTasks = (updatedTask, toggle) => {
+    const updatedTasks = tasks.map((task) => (task.id === updatedTask.id
+      ? { ...task, ...updatedTask }
+      : task));
+    onUpdateTasks(updatedTasks);
+    if (toggle) {
+      toggleModal();
     }
-    return id ;
   };
 
-  deleteTask = id => {
-    const { tasks } = this.state;
-    this.setState({ tasks: tasks.filter(task => task.id !== id)});
-    this.toggleModal();
-  };
-
-  handleItemClick = id => {
-    const { tasks } = this.state;
-    this.setState({ activeTask: tasks.find(task => task.id === id)});
-    this.toggleModal();
-  };
-
-  toggleModal = () => this.setState(prevState => ({ isOpenModal: !prevState.isOpenModal }));
-
-  updateTasks = (updatedTask, callback) => {
-    const { tasks } = this.state;
-    const updatedTasks = tasks.map(task => task.id === updatedTask.id ? {...task, ...updatedTask} : task);
-    this.setState({ tasks: updatedTasks });
-    callback && callback();
-  };
-
-  timeStampToString = timestamp => {
+  const timeStampToString = (timestamp) => {
     const date = new Date(timestamp);
     const day = date.getDate();
     const month = date.getMonth() + 1;
     const year = date.getFullYear();
-    return `${day}/${month}/${year}`
+    return `${day}/${month}/${year}`;
   };
 
-  render() {
-    const { tasks, activeTask, isOpenModal } = this.state;
-    return(
-          <div className="columns is-centered is-gapless">
-            <div className="column is-three-fifths">
-              <Heading
-                timeStampToString={this.timeStampToString}
-                addTask={this.addTask}
-              />
-              <div className="column">
-                {tasks.map(task =>
-                  <TodoListItem
-                    task={task}
-                    key={task.id}
-                    onClick={this.handleItemClick}
-                    updateTasks={this.updateTasks}
-                    timeStampToString={this.timeStampToString}
-                  />
-                )}
-              </div>
-              {isOpenModal &&
-              <TodoEditItem
-                task={activeTask}
-                isOpen={isOpenModal}
-                toggleModal={this.toggleModal}
-                updateTasks={this.updateTasks}
-                handleInputChange={this.handleInputChange}
-                deleteTask={this.deleteTask}
-              />
-              }
-            </div>
-          </div>
-    );
-  }
-}
+  const filteredTasks = () => {
+    if (filter === 'Done') {
+      return (tasks.filter((task) => task.done));
+    } if (filter === 'Active') {
+      return (tasks.filter((task) => !task.done));
+    }
+    return (tasks);
+  };
 
-export default TodoList;
+  return (
+    <div className="columns is-centered is-gapless">
+      <div className="column is-three-fifths">
+        <Heading
+          timeStampToString={timeStampToString}
+          addTask={addTask}
+          setFilter={setFilter}
+          filterOptions={FILTER_OPTIONS}
+          filter={filter}
+        />
+        <div className="column">
+          {filteredTasks().map((task) => (
+            <TodoListItem
+              task={task}
+              key={task.id}
+              onClick={handleItemClick}
+              updateTasks={saveTasks}
+              timeStampToString={timeStampToString}
+            />
+          ))}
+        </div>
+        {isOpenModal
+          && (
+          <TodoEditItem
+            activeTask={activeTask}
+            isOpen={isOpenModal}
+            toggleModal={toggleModal}
+            updateTasks={saveTasks}
+            deleteTask={deleteTask}
+          />
+          )}
+      </div>
+    </div>
+  );
+};
+
+const mapStateToProps = (state) => ({
+  tasks: state.tasks,
+});
+
+const mapDispatchToProps = (dispatch) => ({
+  onUpdateTasks: (tasks) => dispatch(updateTasks(tasks)),
+});
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(TodoList);
+
+TodoList.propTypes = {
+  onUpdateTasks: PropTypes.func.isRequired,
+  tasks: PropTypes.shape({
+    filter: PropTypes.func.isRequired,
+    map: PropTypes.func.isRequired,
+    find: PropTypes.func.isRequired,
+  }).isRequired,
+  activeTask: PropTypes.shape({}).isRequired,
+};

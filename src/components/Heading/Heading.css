@@ -9,3 +9,27 @@
 .heading-title {
   padding: 20px 0;
 }
+.custom_control {
+  background-color: #00d1b2;
+  color: #fff;
+  cursor: pointer;
+  justify-content: center;
+  text-align: center;
+  white-space: nowrap;
+  align-items: center;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  box-shadow: none;
+  display: inline-flex;
+  font-size: 1rem;
+  height: 2.5em;
+  text-transform: none;
+}
+.custom_control:hover {
+  background-color: #00c4a7;
+  border-color: transparent;
+  color: #fff;
+}
+.custom_arrow {
+  top: 17px;
+}
