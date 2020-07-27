@@ -9,7 +9,7 @@ import TodoEditItem from '../TodoEditItem/TodoEditItem';
 const FILTER_OPTIONS = ['All', 'Done', 'Active'];
 
 const TodoList = ({ onUpdateTasks, tasks }) => {
-  const [activeTask, setActiveTask] = useState(undefined);
+  const [activeTask, setActiveTask] = useState({});
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [filter, setFilter] = useState('All');
 
@@ -116,10 +116,5 @@ export default connect(
 
 TodoList.propTypes = {
   onUpdateTasks: PropTypes.func.isRequired,
-  tasks: PropTypes.shape({
-    filter: PropTypes.func.isRequired,
-    map: PropTypes.func.isRequired,
-    find: PropTypes.func.isRequired,
-  }).isRequired,
-  activeTask: PropTypes.shape({}).isRequired,
+  tasks: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
 };

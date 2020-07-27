@@ -49,5 +49,4 @@ TodoListItem.propTypes = {
   onClick: PropTypes.func.isRequired,
   updateTasks: PropTypes.func.isRequired,
   timeStampToString: PropTypes.func.isRequired,
-  activeTask: PropTypes.shape({}).isRequired,
 };

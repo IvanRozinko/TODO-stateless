@@ -12,6 +12,12 @@
   transform: translate3d(0, 0, 10px) scale3d(1.05, 1.05, 1);
   transition: transform 100ms;
 }
+.checkbox-container:focus {
+ outline: none;
+}
+.outline_none:focus {
+  outline: none;
+}
 .checked-side {
   bottom: 28%;
   left: 75%;

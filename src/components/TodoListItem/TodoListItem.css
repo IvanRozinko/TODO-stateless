@@ -7,6 +7,9 @@
   transform: translate3d(0, -2px, 4px) scale3d(1.02, 1.1, 1);
   transition: transform 100ms;
 }
+.title-container:focus {
+ outline: none;
+}
 .task-title {
   overflow: hidden;
   text-overflow: ellipsis;
